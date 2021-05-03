@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -36,15 +37,18 @@ namespace TinyBrowser
             UriBuilder uriBuilder = new UriBuilder(null, host);
             uriBuilder.Path = uri;
             Console.WriteLine($"Opened {uriBuilder}");
-            Console.WriteLine("Title: " + response.FindTextBetween("<title>", "</title>"));
-            
-            string test = "<a href=\"https";
+            Console.WriteLine("Title: " + response.FindTextBetween("<title>", "</title>").Substring("<title>".Length));
 
-            foreach (int index in response.AllIndexesOf(test))
-            {
-                Console.WriteLine(response.FindTextBetween(index + "<a href=\"".Length, "\""));
-            }
+            List<int> allIndexesOf = response.AllIndexesOf("<a href=\"");
             
+            for (int i = 0; i < allIndexesOf.Count; i++) {
+                string url = response.FindTextBetween(allIndexesOf[i] + "<a href=\"".Length, "\"");
+                string bread = response.FindTextBetween(allIndexesOf[i] + ("<a href=\"" + url + "\">").Length, "</a>");
+
+                string prettify = $"{bread.Substring(0, 6)}...{bread.Substring(bread.Length - 6)}";
+                Console.WriteLine($"{i}: {prettify} ({url})");
+            }
+
             //var titleText = FindTextBetweenTags(response, "<title>", "</title>");
         }
     }
