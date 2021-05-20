@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace TinyBrowser
 {
@@ -31,11 +30,38 @@ namespace TinyBrowser
             List<int> indexes = new List<int>();
 
             for (int index = 0;; index += value.Length) {
-                index = str.IndexOf(value, index);
+                index = str.IndexOf(value, index, StringComparison.Ordinal);
                 if (index == -1)
                     return indexes;
                 indexes.Add(index);
             }
         }
+
+        public static List<UrlData> GetNameAndUrl(string website, string searchFor)
+        {
+            List<int> indexes = website.AllIndexesOf(searchFor);
+            List<UrlData> result = new List<UrlData>();
+            
+            foreach (int index in indexes)
+            {
+                string url         = website.FindTextBetween(index + searchFor.Length, "\"");
+                string displayName = website.FindTextBetween(index + $"{searchFor}{url}\">".Length, "</a>");
+                
+                result.Add(new UrlData(displayName, url));
+            }
+            return result;
+        }
+    }
+
+    public struct UrlData
+    {
+        public UrlData(string displayName, string url)
+        {
+            DisplayName = displayName;
+            Url = url;
+        }
+
+        public string DisplayName { get; private set; }
+        public string Url { get; private set; }
     }
 }
