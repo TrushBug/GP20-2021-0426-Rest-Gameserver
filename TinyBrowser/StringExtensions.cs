@@ -51,29 +51,26 @@ namespace TinyBrowser
                 string url         = website.FindTextBetween(index + searchFor.Length, "\"");
                 string displayName = website.FindTextBetween(index + $"{searchFor}{url}\">".Length, "</a>");
                 
-                result.Add(new UrlData(website.FindTextBetween(index + $"{searchFor}{url}\">".Length, "</a>"), website.FindTextBetween(index + searchFor.Length, "\"")));
+                result.Add(new UrlData(website.FindTextBetween(index + $"{searchFor}{url}\">".Length, "</a>"), null, website.FindTextBetween(index + searchFor.Length, "\"")));
             }
             return result;
         }
 
-        public static List<UrlData> RemoveSpecifiedElement(this List<UrlData> list, string element)
+        public static void RemoveSpecifiedElement(this List<UrlData> list, string element)
         {
             foreach (UrlData hyperLink in list.ToList().Where(hyperLink => hyperLink.DisplayName.Contains(element)))
                 list.Remove(hyperLink);
-
-            return list;
         }
     }
 
     public struct UrlData
     {
-        public UrlData(string displayName, string url)
-        {
-            DisplayName = displayName;
-            Url = url;
-        }
+        public UrlData(string displayName, string host)              { DisplayName = displayName; Host = host; Path = null; }
+        public UrlData(string displayName, string host, string path) { DisplayName = displayName; Host = host; Path = path; }
 
         public string DisplayName { get; private set; }
-        public string Url { get; private set; }
+        public string Host { get; private set; }
+        
+        public string Path { get; private set; }
     }
 }

@@ -25,7 +25,7 @@ namespace TinyBrowser
 
             UriBuilder uriBuilder = new UriBuilder(null, host) {Path = Uri + url};
     
-            Console.WriteLine($"Opened {uriBuilder}");
+            Console.WriteLine($"\nOpened {uriBuilder}");
             Console.WriteLine("Title: " + response.FindTextBetween("<title>", "</title>").Substring("<title>".Length));
 
             return response;
