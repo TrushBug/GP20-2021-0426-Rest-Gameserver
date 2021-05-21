@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TinyBrowser
 {
@@ -16,7 +17,8 @@ namespace TinyBrowser
             int titleIndex = start;
             string title = string.Empty;
             
-            if (titleIndex != -1) {
+            if (titleIndex != -1) 
+            {
                 int titleEndIndex = end;
                 if (titleEndIndex > titleIndex) title = original[titleIndex..titleEndIndex];
             }
@@ -24,13 +26,15 @@ namespace TinyBrowser
             return title;
         }
 
-        public static List<int> AllIndexesOf(this string str, string value) {
-            if (String.IsNullOrEmpty(value))
-                throw new ArgumentException("the string to find may not be empty", nameof(value));
+        public static List<int> AllIndexesOf(this string str, string value) 
+        {
+            if (String.IsNullOrEmpty(value)) throw new ArgumentException("the string to find may not be empty", nameof(value));
+            
             List<int> indexes = new List<int>();
 
-            for (int index = 0;; index += value.Length) {
-                index = str.IndexOf(value, index, StringComparison.Ordinal);
+            for (int index = 0;; index += value.Length) 
+            {
+                index = str.IndexOf(value, index, StringComparison.OrdinalIgnoreCase);
                 if (index == -1)
                     return indexes;
                 indexes.Add(index);
@@ -47,9 +51,17 @@ namespace TinyBrowser
                 string url         = website.FindTextBetween(index + searchFor.Length, "\"");
                 string displayName = website.FindTextBetween(index + $"{searchFor}{url}\">".Length, "</a>");
                 
-                result.Add(new UrlData(displayName, url));
+                result.Add(new UrlData(website.FindTextBetween(index + $"{searchFor}{url}\">".Length, "</a>"), website.FindTextBetween(index + searchFor.Length, "\"")));
             }
             return result;
+        }
+
+        public static List<UrlData> RemoveSpecifiedElement(this List<UrlData> list, string element)
+        {
+            foreach (UrlData hyperLink in list.ToList().Where(hyperLink => hyperLink.DisplayName.Contains(element)))
+                list.Remove(hyperLink);
+
+            return list;
         }
     }
 
