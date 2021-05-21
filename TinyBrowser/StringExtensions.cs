@@ -6,24 +6,18 @@ namespace TinyBrowser
 {
     public static class StringExtensions {
         public static string FindTextBetween(this string original, string start, string end) { return original.FindTextBetweenIndex(original.IndexOf(start, StringComparison.OrdinalIgnoreCase), original.IndexOf(end, StringComparison.OrdinalIgnoreCase)); }
-        
         public static string FindTextBetween(this string original, int start, int end)       { return original.FindTextBetweenIndex(start, end); }
-        
         public static string FindTextBetween(this string original, int start, string end)    { return original.FindTextBetweenIndex(start, original.IndexOf(end, start, StringComparison.OrdinalIgnoreCase)); }
         
         //public static string FindTextBetween(this string original, string start, int end)    { return original.FindTextBetweenIndex(original.IndexOf(start, StringComparison.OrdinalIgnoreCase), end); }
         
         private static string FindTextBetweenIndex(this string original, int start, int end) {
-            int titleIndex = start;
-            string title = string.Empty;
+            string result = string.Empty;
+
+            if (start == -1) return result;
+            if (end > start) result = original[start..end];
             
-            if (titleIndex != -1) 
-            {
-                int titleEndIndex = end;
-                if (titleEndIndex > titleIndex) title = original[titleIndex..titleEndIndex];
-            }
-            
-            return title;
+            return result;
         }
 
         public static List<int> AllIndexesOf(this string str, string value) 
@@ -64,7 +58,7 @@ namespace TinyBrowser
 
         public static string Prettify(this string s)
         {
-            return s == null ? null : $"{s.Substring(0, 6)}...{s.Substring(s.Length - 6)}";
+            return s.Length > 15 ? $"{s.Substring(0, 6)}...{s.Substring(s.Length - 6)}" : s.PadRight(15);
         }
     }
 

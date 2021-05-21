@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace TinyBrowser
 {
@@ -8,8 +9,9 @@ namespace TinyBrowser
         private static string _host = "acme.com";
         private static List<UrlData> _globalHistory   = new List<UrlData>();
         private static List<UrlData> _navigateHistory = new List<UrlData>();
+        private const string RegPattern = "https://|http://";
         private static int _historyPointer = 0;
-        private static string _url;
+        private static string _url = "https://acme.com/";
         private const int Port = 80;
 
         static void Main(string[] arguments)
@@ -17,10 +19,12 @@ namespace TinyBrowser
             _globalHistory.Add(new UrlData(null, _host));
             _navigateHistory.Add(new UrlData(null, _host));
             
+            Regex rx = new Regex($@"({RegPattern})", RegexOptions.IgnoreCase);
+
             while (true)
             {
                 Console.ResetColor();
-                string readWeb = WebsiteConnect.Connect(_host, _url, Port);
+                string readWeb = WebsiteConnect.Connect(_url, _host, Port);
                 
                 List<UrlData> hyperLinks = StringExtensions.GetNameAndUrl(readWeb, "<a href=\"");
                 hyperLinks.RemoveSpecifiedElement("<img");
@@ -33,10 +37,9 @@ namespace TinyBrowser
                 }
             
                 Console.ForegroundColor = ConsoleColor.Green;
-                if (hyperLinksCount > 0) 
-                    Console.WriteLine($"\nNavigate the site ({_host}/{_url}) by choosing an index between 0 and {hyperLinksCount - 1} or the letters (b)ack, (f)orward, (r)efresh, (h)istory");
-                else
-                    Console.WriteLine($"\n No hyperlinks found. Navigate the site ({_host}/{_url}) by choosing the letters (b)ack, (f)orward, (r)efresh, (h)istory");
+                Console.WriteLine(hyperLinksCount > 0
+                    ? $"\nNavigate the site ({_url}) by choosing an index between 0 and {hyperLinksCount - 1} or the letters (b)ack, (f)orward, (r)efresh, (h)istory"
+                    : $"\n No hyperlinks found. Navigate the site ({_url}) by choosing the letters (b)ack, (f)orward, (r)efresh, (h)istory");
 
                 while (true)
                 {
@@ -72,9 +75,17 @@ namespace TinyBrowser
                                     int temp = Convert.ToInt32(userInput);
                                     if (temp >= hyperLinksCount || temp < 0)
                                         throw new Exception();
-                                    
-                                    _url = hyperLinks[temp].Path;
-                                    
+
+                                    if (rx.IsMatch(hyperLinks[temp].Path))
+                                    {
+                                        _host = new Uri(hyperLinks[temp].Path).Host;
+                                        _url = new Uri(hyperLinks[temp].Path).PathAndQuery;
+                                        
+                                        Console.WriteLine($"{_host}  {_url}");
+                                    }
+                                    else 
+                                        _url = hyperLinks[temp].Path;
+
                                     _globalHistory.Add(hyperLinks[temp]);
                                     
                                     _navigateHistory.RemoveRange(_navigateHistory.Count - _historyPointer, _historyPointer);

@@ -9,24 +9,45 @@ namespace TinyBrowser
     {
         private const string Uri = "/";
 
-        public static string Connect (string host, string url, int port)
+        public static string Connect (string url, string host, int port)
         {
-
+            string path = url[0] == '/' ? url : "/" + url;
+            try
+            {
+                if (url.Contains("//"))
+                {
+                    path = new Uri(url).PathAndQuery;
+                    //host = new Uri(url).Host;
+                }
+                    
+            }
+            catch (Exception e){/*Ignored*/}
+            
             using TcpClient tcpClient = new TcpClient(host, port);
             using NetworkStream stream = tcpClient.GetStream();
             using StreamWriter streamWriter = new StreamWriter(stream, Encoding.ASCII);
             using StreamReader streamReader = new StreamReader(stream);
+            
 
-            string request = $"GET {Uri + url} HTTP/1.1\r\nHost: {host}\r\n\r\n";
+            string request = $"GET {path} HTTP/1.1\r\nHost: {host}\r\n\r\n";
             streamWriter.Write(request);
             streamWriter.Flush();
             
             string response = streamReader.ReadToEnd();
-
-            UriBuilder uriBuilder = new UriBuilder(null, host) {Path = Uri + url};
+            
+            UriBuilder uriBuilder = new UriBuilder(null, host) {Path = path};
     
             Console.WriteLine($"\nOpened {uriBuilder}");
-            Console.WriteLine("Title: " + response.FindTextBetween("<title>", "</title>").Substring("<title>".Length));
+
+            try
+            {
+                Console.WriteLine("Title: " + response.FindTextBetween("<title>", "</title>").Substring("<title>".Length));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Couldn't find title of website");
+            }
+            
 
             return response;
         }
