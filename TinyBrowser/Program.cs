@@ -21,20 +21,22 @@ namespace TinyBrowser
             {
                 Console.ResetColor();
                 string readWeb = WebsiteConnect.Connect(_host, _url, Port);
-
+                
                 List<UrlData> hyperLinks = StringExtensions.GetNameAndUrl(readWeb, "<a href=\"");
-
                 hyperLinks.RemoveSpecifiedElement("<img");
 
                 int hyperLinksCount = 0;
-                foreach (UrlData hyperLink in hyperLinks) {
-                    string prettify = $"{hyperLink.DisplayName.Substring(0, 6)}...{hyperLink.DisplayName.Substring(hyperLink.DisplayName.Length - 6)}";
-                    Console.WriteLine($"{hyperLinksCount}: {hyperLink.DisplayName} ({hyperLink.Path})");
+                foreach (UrlData hyperLink in hyperLinks)
+                {
+                    Console.WriteLine($"{hyperLinksCount}: {hyperLink.DisplayName.Prettify()} ({hyperLink.Path})");
                     hyperLinksCount++;
                 }
             
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nNavigate the site ({_host}/{_url}) by choosing an index between 0 and {hyperLinksCount - 1} or the letters (b)ack, (f)orward, (r)efresh, (h)istory");
+                if (hyperLinksCount > 0) 
+                    Console.WriteLine($"\nNavigate the site ({_host}/{_url}) by choosing an index between 0 and {hyperLinksCount - 1} or the letters (b)ack, (f)orward, (r)efresh, (h)istory");
+                else
+                    Console.WriteLine($"\n No hyperlinks found. Navigate the site ({_host}/{_url}) by choosing the letters (b)ack, (f)orward, (r)efresh, (h)istory");
 
                 while (true)
                 {
@@ -61,7 +63,9 @@ namespace TinyBrowser
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     Console.WriteLine("History");
                                     for (int i = 0; i < _globalHistory.Count; i++) 
-                                        Console.WriteLine($"{i}: {_globalHistory[i].DisplayName} ({_globalHistory[i].Host}{_globalHistory[i].Path})");
+                                        Console.WriteLine($"{i}: {_globalHistory[i].DisplayName.Prettify()} ({_globalHistory[i].Host}{_globalHistory[i].Path})");
+
+                                    Console.ReadKey();
                                     break;
 
                                 default:

@@ -61,6 +61,11 @@ namespace TinyBrowser
             foreach (UrlData hyperLink in list.ToList().Where(hyperLink => hyperLink.DisplayName.Contains(element)))
                 list.Remove(hyperLink);
         }
+
+        public static string Prettify(this string s)
+        {
+            return s == null ? null : $"{s.Substring(0, 6)}...{s.Substring(s.Length - 6)}";
+        }
     }
 
     public struct UrlData
